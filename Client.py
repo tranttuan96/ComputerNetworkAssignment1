@@ -212,10 +212,11 @@ class Client:
 	def recvRtspReply(self):
 		"""Receive RTSP reply from the server."""
 		while True:
-			reply = self.rtspSocket.recv(1024)
+			reply = self.rtspSocket.recv(1024).decode("utf-8")
 			
 			if reply: 
-				self.parseRtspReply(reply.decode("utf-8"))
+				print("[*]Received reply:\n" + reply + "\n")
+				self.parseRtspReply(reply)
 			
 			# Close the RTSP socket upon requesting Teardown
 			if self.requestSent == self.TEARDOWN:
