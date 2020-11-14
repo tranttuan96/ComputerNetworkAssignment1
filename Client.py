@@ -92,7 +92,6 @@ class Client:
 	
 	def listenRtp(self):		
 		"""Listen for RTP packets."""
-		print('test')
 		while True:
 			try:
 				data = self.rtpSocket.recv(20480)
@@ -141,7 +140,7 @@ class Client:
 		try:
 			self.rtspSocket.connect((self.serverAddr, self.serverPort))
 		except:
-			tkMessageBox.showwarning('Connection Failed', 'Connection to \'%s\' failed.' %self.serverAddr)
+			tkinter.messagebox.showwarning('Connection Failed', 'Connection to \'%s\' failed.' %self.serverAddr)
 	
 	def sendRtspRequest(self, requestCode):
 		"""Send RTSP request to the server."""	
@@ -207,7 +206,7 @@ class Client:
 		# Send the RTSP request using rtspSocket.
 		self.rtspSocket.send(request.encode())
 		
-		print('\nData sent:\n' + request)
+		print('\n[*]Data sent:\n' + request)
 	
 	def recvRtspReply(self):
 		"""Receive RTSP reply from the server."""
@@ -215,7 +214,7 @@ class Client:
 			reply = self.rtspSocket.recv(1024).decode("utf-8")
 			
 			if reply: 
-				print("[*]Received reply:\n" + reply + "\n")
+				print('\n[*]Received reply:\n' + reply + '\n')
 				self.parseRtspReply(reply)
 			
 			# Close the RTSP socket upon requesting Teardown
@@ -240,9 +239,6 @@ class Client:
 			if self.sessionId == session:
 				if int(lines[0].split(' ')[1]) == 200: 
 					if self.requestSent == self.SETUP:
-						#-------------
-						# TO COMPLETE
-						#-------------
 						# Update RTSP state.
 						self.state = self.READY
 						
@@ -275,7 +271,6 @@ class Client:
 		
 		try:
 			# Bind the socket to the address using the RTP port given by the client user
-			# self.state= self.READY
 			self.rtpSocket.bind(('',self.rtpPort))
 		except:
 			tkinter.messagebox.showwarning('Unable to Bind', 'Unable to bind PORT=%d' %self.rtpPort)
