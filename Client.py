@@ -38,10 +38,10 @@ class Client:
 	def createWidgets(self):
 		"""Build GUI."""
 		# Create Setup button
-		self.setup = Button(self.master, width=20, padx=3, pady=3)
-		self.setup["text"] = "Setup"
-		self.setup["command"] = self.setupMovie
-		self.setup.grid(row=1, column=0, padx=2, pady=2)
+		# self.setup = Button(self.master, width=20, padx=3, pady=3)
+		# self.setup["text"] = "Setup"
+		# self.setup["command"] = self.setupMovie
+		# self.setup.grid(row=1, column=0, padx=2, pady=2)
 		
 		# Create Play button		
 		self.start = Button(self.master, width=20, padx=3, pady=3)
@@ -139,6 +139,7 @@ class Client:
 		self.rtspSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
 			self.rtspSocket.connect((self.serverAddr, self.serverPort))
+			threading.Thread(target=self.recvRtspReply).start()
 		except:
 			tkinter.messagebox.showwarning('Connection Failed', 'Connection to \'%s\' failed.' %self.serverAddr)
 	
@@ -150,7 +151,6 @@ class Client:
 		
 		# Setup request
 		if requestCode == self.SETUP and self.state == self.INIT:
-			threading.Thread(target=self.recvRtspReply).start()
 			# Update RTSP sequence number.
 			self.rtspSeq = 1
 			
@@ -212,10 +212,12 @@ class Client:
 		"""Receive RTSP reply from the server."""
 		while True:
 			reply = self.rtspSocket.recv(1024).decode("utf-8")
-			
 			if reply: 
 				print('\n[*]Received reply:\n' + reply + '\n')
-				self.parseRtspReply(reply)
+				if self.state == self.INIT and self.requestSent != self.SETUP:
+					self.setupMovie()
+				else:	
+					self.parseRtspReply(reply)
 			
 			# Close the RTSP socket upon requesting Teardown
 			if self.requestSent == self.TEARDOWN:
@@ -226,6 +228,7 @@ class Client:
 	def parseRtspReply(self, data):
 		"""Parse the RTSP reply from the server."""
 		lines = data.split('\n')
+		
 		seqNum = int(lines[1].split(' ')[1])
 		
 		# Process only if the server reply's sequence number is the same as the request's

@@ -15,6 +15,8 @@ class ServerWorker:
 	PLAYING = 2
 	state = INIT
 
+	isConnect = 0
+
 	OK_200 = 0
 	FILE_NOT_FOUND_404 = 1
 	CON_ERR_500 = 2
@@ -29,9 +31,17 @@ class ServerWorker:
 	
 	def recvRtspRequest(self):
 		"""Receive RTSP request from the client."""
+
 		connSocket = self.clientInfo['rtspSocket'][0]
-		while True:         
+
+		if self.state == self.INIT and self.isConnect == 0:
+			reply = 'ConnectOK' + '\n'
+			connSocket.send(reply.encode())
+			self.isConnect == 1
+
+		while True:        
 			data = connSocket.recv(256)
+
 			if data:
 				print("Data received:\n" + data.decode("utf-8"))
 				self.processRtspRequest(data.decode("utf-8"))
